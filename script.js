@@ -1,77 +1,112 @@
-let containerPalavra = document.querySelector('.containerPalavra');
-let botaoEnviar = document.querySelector('#btnEnviar');
-let chancetxt = document.querySelector('h2');
+let wordBoard = document.querySelector('.wordBoard');
+let btnSubmit = document.querySelector('#btnSubmit');
+let chanceH2 = document.querySelector('.chances');
 
-let palavraCorreta = ['muito', 'sonho', 'moral', 'tempo', 'dizer', 'causa'];
+let correctWord = [
+  'muito',
+  'sonho',
+  'moral',
+  'tempo',
+  'dizer',
+  'causa',
+  'amigo',
+  'sobre',
+  'mundo',
+  'censo',
+  'regra',
+  'ontem',
+];
 
-let chance = 5;
+let chances = 5;
 
-let index = Math.floor(Math.random() * palavraCorreta.length );
-let palavraSorteada = palavraCorreta[index].toUpperCase();
+//sortear palavra aleatoria do array de palavras.
+let indexDrawn = Math.floor(Math.random() * correctWord.length );
+let wordDrawn = correctWord[indexDrawn].toUpperCase();
 
-botaoEnviar.addEventListener('click', () =>{
-  const arrayDeLetras = document.querySelectorAll('.celula');
+console.log(wordDrawn);
 
-  let newString = '';
-  for (let index2 = 0; index2 < arrayDeLetras.length; index2++) {
-    if(arrayDeLetras[index2].disabled != true){
-      newString += arrayDeLetras[index2].value;
+function generateBoard(){
+  //gerar nova linha com 5 quadros somente quando o botão é clicado
+  const line = document.createElement('div');
+    for (let index = 0; index < 5; index += 1) {
+      const column = document.createElement('input');
+      column.maxLength = 1;
+      column.classList.add('cell');
+      line.appendChild(column);
+    }
+  wordBoard.appendChild(line);
+}
+
+function disableLine(arrayCell){
+  //Desativar linha anterior
+  if(arrayCell.length !== 0){
+    for(let count = 0; count < arrayCell.length; count += 1){
+      arrayCell[count].setAttribute('disabled', 'true');
     }
   }
-  compararPalavra(newString);
+}
 
+function paintCell(arrayCell){
+  //aux para fazer a palavra montada voltar ao inicio já que pegamos todas as cells -
+  //e o index vai acabar ultrapassando o tamanho da palavra
   let aux = 0;
-  for(let index = 0; index < arrayDeLetras.length; index +=1){
-    if(aux > 4) aux = 0;
+  for(let index = 0; index < arrayCell.length; index +=1){
 
-    if(arrayDeLetras[index].value.toUpperCase() === palavraSorteada[aux]){
-      arrayDeLetras[index].style.backgroundColor = 'rgb(3, 68, 34)';
-      arrayDeLetras[index].style.color = 'white';
-    }else if(palavraSorteada.includes(arrayDeLetras[index].value.toUpperCase())){
-      arrayDeLetras[index].style.backgroundColor = 'rgb(211,145,0)';
-      arrayDeLetras[index].style.color = 'white';
+    let typedLetterValue = arrayCell[index].value.toUpperCase();
+
+    if(aux > 4) aux = 0;
+    if(typedLetterValue === wordDrawn[aux]){
+      arrayCell[index].style.backgroundColor = 'rgb(3, 68, 34)';
+      arrayCell[index].style.color = 'white';
+    }else if(wordDrawn.includes(typedLetterValue)){
+      arrayCell[index].style.backgroundColor = 'rgb(211,145,0)';
+      arrayCell[index].style.color = 'white';
     }
-    aux ++;
+
+    aux += 1;
+  }
+}
+
+function checkWord(string, arrayCell){
+
+  //verificação se ganhou perdeu ou continua o jogo
+  
+  if(string.toUpperCase() === wordDrawn){
+    chanceH2.innerText = 'Você ganhou !';
+    paintCell(arrayCell);
+  }else if (chances < 2){
+    alert('Você Perdeu :(');
+    chanceH2.innerText = 'A palavra é: ' + wordDrawn;
+  }else{
+    chances -= 1;
+    chanceH2.innerText = 'Chances: ' + chances;
+    disableLine(arrayCell);
+    paintCell(arrayCell);
+    generateBoard();
+  }
+}
+
+
+btnSubmit.addEventListener('click', () => {
+
+  const arrayCell = document.querySelectorAll('.cell');
+
+  //montar a palavra
+  let newString = '';
+  for (let count = 0; count < arrayCell.length; count += 1) {
+    if(arrayCell[count].disabled != true){
+      newString += arrayCell[count].value;
+    }
+  }
+  
+  //verificar se a palavra existe no array
+  if(!correctWord.includes(newString)){
+    alert('Não temos essa palavra no nosso banco - tente novamente');
+  }
+  else{
+    checkWord(newString, arrayCell);
   }
   
 })
 
-function board(){
-  const celulas = document.querySelectorAll('.celula');
-  if(celulas.length != 0){
-    for(let index2 = 0; index2 < celulas.length; index2 += 1){
-      celulas[index2].setAttribute('disabled', 'true');
-    }
-  }
-  const linha = document.createElement('div');
-    for (let index = 0; index < 5; index++) {
-      const colunas = document.createElement('input');
-      colunas.maxLength = 1;
-      colunas.classList.add('celula');
-      linha.appendChild(colunas);
-    }
-    containerPalavra.appendChild(linha);
-}
-board();
-
-function verificarPalavra(string){
-  if(string.toUpperCase() === palavraSorteada){
-    chancetxt.innerText = 'Você ganhou !';
-  }else if (chance < 2){
-    alert('Perdeu !!');
-    chancetxt.innerText = 'A palavra é: ' + palavraSorteada;
-  }else{
-    board();
-    chance --;
-    chancetxt.innerText = 'Chances: ' + chance;
-  }
-}
-
-function compararPalavra (string){
-  if(!palavraCorreta.includes(string)){
-    alert('Não temos essa palavra no nosso banco!');
-  }
-  else{
-    verificarPalavra(string);
-  }
-}
+generateBoard();
