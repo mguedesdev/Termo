@@ -1,4 +1,4 @@
-#Jogo Termo
+# Jogo Termo
 
 Este código implementa um jogo de adivinhação de palavras com interface simples e teclado virtual. O jogador deve digitar uma palavra de 5 letras e verificar se ela corresponde à palavra escolhida aleatoriamente pelo programa.
 
